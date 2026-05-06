@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel do Aluno</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink-0:#000000; --ink-1:#050505; --ink-2:#0b0b0b; --ink-3:#141414;
+    --line-1:#1a1a1a; --line-2:#262626; --line-3:#3a3a3a;
+    --text-hi:#ffffff; --text-mid:#e8e8e6; --text-dim:#cfcfcb; --text-faint:#a8a8a3;
+    --neon:#c4ff5e; --neon-dim:#9ec947; --neon-deep:#4a6517; --neon-glow:rgba(196,255,94,0.18);
+    --font-display:"Space Grotesk", ui-sans-serif, system-ui;
+    --font-body:"Inter", ui-sans-serif, system-ui;
+    --font-mono:"JetBrains Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: var(--font-body);
+    background: var(--ink-0);
+    color: var(--text-mid);
+    display: flex; flex-direction: column;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  header {
+    background: var(--ink-1);
+    border-bottom: 1px solid var(--line-1);
+    padding: 14px 22px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 24px; flex-wrap: wrap;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--neon);
+    box-shadow: 0 0 12px var(--neon-glow);
+  }
+  .brand h1 {
+    font-family: var(--font-display);
+    font-size: 16px; font-weight: 400;
+    letter-spacing: -.01em;
+    color: var(--text-hi);
+  }
+  .brand small {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 10px; font-weight: 400;
+    color: var(--text-faint);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .controls { display: flex; align-items: center; gap: 10px; }
+  .controls label {
+    font-family: var(--font-mono);
+    font-size: 10px; font-weight: 400;
+    color: var(--text-faint);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+  .controls select {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 8px 32px 8px 12px;
+    border: 1px solid var(--line-2);
+    border-radius: 6px;
+    background: var(--ink-2);
+    color: var(--text-mid);
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a8a8a3' d='M6 8.5L2 4.5h8z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    min-width: 220px;
+    transition: border-color .15s;
+  }
+  .controls select:hover { border-color: var(--line-3); }
+  .controls select:focus { outline: none; border-color: var(--neon-dim); }
+  .controls select:disabled { opacity: .5; cursor: not-allowed; }
+  .controls-sep {
+    width: 1px; height: 20px;
+    background: var(--line-2);
+    margin: 0 4px;
+  }
+  .btn-claude {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 14px;
+    background: var(--neon); color: var(--ink-0);
+    border: none; border-radius: 6px;
+    font-family: var(--font-mono);
+    font-size: 11px; font-weight: 600;
+    letter-spacing: .08em; text-transform: uppercase;
+    cursor: pointer; transition: opacity .15s;
+    white-space: nowrap;
+  }
+  .btn-claude:hover { opacity: .82; }
+
+  main {
+    flex: 1;
+    position: relative;
+    background: var(--ink-0);
+    min-height: 0;
+  }
+  iframe#painel-frame {
+    width: 100%; height: 100%;
+    border: 0; display: block;
+    background: var(--ink-0);
+  }
+  iframe#painel-frame.hidden { display: none; }
+
+  .aviso {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    padding: 32px; overflow-y: auto;
+  }
+  .aviso.hidden { display: none; }
+  .aviso-card {
+    max-width: 560px; width: 100%;
+    background: var(--ink-2);
+    border: 1px solid var(--line-2);
+    border-radius: 14px;
+    padding: 36px 32px;
+  }
+  .aviso-icon {
+    width: 52px; height: 52px;
+    border-radius: 12px;
+    background: var(--ink-3);
+    border: 1px solid var(--line-2);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 18px;
+    color: var(--neon);
+  }
+  .aviso-card h2 {
+    font-family: var(--font-display);
+    font-size: 22px; font-weight: 400;
+    text-align: center;
+    margin-bottom: 10px;
+    color: var(--text-hi);
+    letter-spacing: -.01em;
+  }
+  .aviso-lead {
+    font-size: 14px; color: var(--text-dim);
+    line-height: 1.6; text-align: center;
+    margin-bottom: 22px;
+  }
+  .aviso-card code {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: var(--ink-3);
+    color: var(--neon-dim);
+    padding: 2px 7px;
+    border-radius: 4px;
+    border: 1px solid var(--line-1);
+    margin: 0 2px;
+  }
+  .passos { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
+  .passos.hidden { display: none; }
+  .passo {
+    background: var(--ink-1);
+    border: 1px solid var(--line-1);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex; gap: 14px;
+    align-items: flex-start;
+    text-align: left;
+  }
+  .passo-num {
+    flex-shrink: 0;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--neon);
+    color: var(--ink-0);
+    font-family: var(--font-mono);
+    font-size: 12px; font-weight: 500;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .passo-conteudo { flex: 1; min-width: 0; }
+  .passo-titulo {
+    font-family: var(--font-display);
+    font-size: 14px; font-weight: 500;
+    color: var(--text-hi);
+    margin-bottom: 4px;
+  }
+  .passo-desc {
+    font-size: 13px; color: var(--text-dim);
+    line-height: 1.5;
+  }
+  .passo-cmd {
+    display: block; margin-top: 8px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: var(--ink-0);
+    color: var(--neon);
+    padding: 9px 12px;
+    border: 1px solid var(--line-1);
+    border-radius: 6px;
+    word-break: break-all;
+    user-select: all; cursor: text;
+  }
+
+  .aviso-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 22px; }
+  .aviso-actions.hidden { display: none; }
+  .aviso-btn {
+    width: 100%; padding: 12px 20px;
+    border: none; border-radius: 8px;
+    font-family: var(--font-body);
+    font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: opacity .15s;
+  }
+  .aviso-btn:hover { opacity: .85; }
+  .aviso-btn:disabled { opacity: .45; cursor: default; }
+  .aviso-btn-primary { background: var(--neon); color: var(--ink-0); }
+  .aviso-btn-secondary {
+    background: transparent; border: 1px solid var(--line-2); color: var(--text-dim);
+  }
+
+  @media (max-width: 640px) {
+    header {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+      padding: 12px 14px;
+    }
+    .controls { justify-content: space-between; }
+    .controls select { flex: 1; min-width: 0; }
+  }
+</style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="brand-dot"></div>
+      <div>
+        <h1>Painel do Aluno</h1>
+        <small id="subtitle">Selecione um produto</small>
+      </div>
+    </div>
+    <div class="controls" id="controls">
+      <label for="select-produto">Produto</label>
+      <select id="select-produto" disabled>
+        <option>Carregando...</option>
+      </select>
+      <div class="controls-sep"></div>
+      <button class="btn-claude" onclick="window.electronAPI && window.electronAPI.openClaude()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        Abrir Claude
+      </button>
+    </div>
+  </header>
+  <main>
+    <iframe id="painel-frame" class="hidden" title="Painel de entregas"></iframe>
+    <div id="aviso" class="aviso hidden">
+      <div class="aviso-card">
+        <div class="aviso-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg>
+        </div>
+        <h2 id="aviso-titulo">Carregando...</h2>
+        <p class="aviso-lead" id="aviso-texto">Aguarde enquanto a lista de produtos é carregada.</p>
+        <div id="aviso-passos" class="passos hidden"></div>
+        <div id="aviso-actions" class="aviso-actions hidden"></div>
+      </div>
+    </div>
+  </main>
+
+<script>
+(function () {
+  const $select = document.getElementById('select-produto');
+  const $frame = document.getElementById('painel-frame');
+  const $aviso = document.getElementById('aviso');
+  const $avisoTitulo = document.getElementById('aviso-titulo');
+  const $avisoTexto = document.getElementById('aviso-texto');
+  const $avisoPassos = document.getElementById('aviso-passos');
+  const $avisoActions = document.getElementById('aviso-actions');
+  const $subtitle = document.getElementById('subtitle');
+
+  function renderAviso({ titulo, texto, passos, actions }) {
+    $avisoTitulo.textContent = titulo;
+    $avisoTexto.innerHTML = texto;
+    if (passos && passos.length) {
+      $avisoPassos.innerHTML = passos.map((p, i) => (
+        '<div class="passo">' +
+          '<div class="passo-num">' + (i + 1) + '</div>' +
+          '<div class="passo-conteudo">' +
+            '<div class="passo-titulo">' + p.titulo + '</div>' +
+            '<div class="passo-desc">' + p.desc + '</div>' +
+            (p.cmd ? '<code class="passo-cmd">' + p.cmd + '</code>' : '') +
+          '</div>' +
+        '</div>'
+      )).join('');
+      $avisoPassos.classList.remove('hidden');
+    } else {
+      $avisoPassos.innerHTML = '';
+      $avisoPassos.classList.add('hidden');
+    }
+    if (actions && actions.length) {
+      $avisoActions.innerHTML = actions.map(a =>
+        '<button class="aviso-btn aviso-btn-' + a.tipo + '" id="' + (a.id || '') + '">' + a.label + '</button>'
+      ).join('');
+      $avisoActions.classList.remove('hidden');
+      actions.forEach(a => {
+        if (a.id && a.onClick) {
+          const el = document.getElementById(a.id);
+          if (el) el.addEventListener('click', a.onClick);
+        }
+      });
+    } else {
+      $avisoActions.innerHTML = '';
+      $avisoActions.classList.add('hidden');
+    }
+    $aviso.classList.remove('hidden');
+    $frame.classList.add('hidden');
+    $frame.src = 'about:blank';
+  }
+
+  function limparAviso() {
+    $aviso.classList.add('hidden');
+  }
+
+  function renderAvisoInstalarClaude() {
+    renderAviso({
+      titulo: 'Claude não está instalado',
+      texto: 'Para usar o Workshop IA, o <strong>Claude da Anthropic</strong> precisa estar instalado no seu computador.',
+      actions: [
+        {
+          id: 'btn-baixar-claude',
+          tipo: 'primary',
+          label: 'Baixar Claude',
+          onClick: function() {
+            if (window.electronAPI && window.electronAPI.openDownloadClaude) {
+              window.electronAPI.openDownloadClaude();
+            }
+          }
+        },
+        {
+          id: 'btn-verificar-claude',
+          tipo: 'secondary',
+          label: 'Já instalei, verificar novamente',
+          onClick: function() { iniciar(); }
+        }
+      ]
+    });
+  }
+
+  async function trocarProduto(slug) {
+    const produtos = (window.MEUS_PRODUTOS && window.MEUS_PRODUTOS.produtos) || [];
+    const produto = produtos.find(p => p.slug === slug);
+    if (!produto) {
+      renderAviso({ titulo: 'Produto não encontrado', texto: 'O produto selecionado não está no manifest.' });
+      return false;
+    }
+    $subtitle.textContent = produto.nome || slug;
+    if (!produto.url) {
+      limparAviso();
+      $frame.classList.remove('hidden');
+      $frame.src = 'skeleton-painel-entregas.html';
+      return true;
+    }
+    limparAviso();
+    $frame.classList.remove('hidden');
+    if (window.electronAPI && window.electronAPI.getProductPath) {
+      const absPath = await window.electronAPI.getProductPath(produto.url);
+      $frame.src = 'file:///' + absPath.replace(/\\/g, '/');
+    } else {
+      $frame.src = '../meus-produtos/' + produto.url;
+    }
+    return true;
+  }
+
+  function carregarSkeleton(rotuloSelect) {
+    $select.innerHTML = '<option>' + rotuloSelect + '</option>';
+    $subtitle.textContent = 'Selecione um produto';
+    $aviso.classList.add('hidden');
+    $frame.classList.remove('hidden');
+    $frame.src = 'skeleton-painel-entregas.html';
+  }
+
+  async function iniciarPainel() {
+    let manifest = null;
+    if (window.electronAPI && window.electronAPI.getManifest) {
+      manifest = await window.electronAPI.getManifest();
+    }
+    if (!manifest) {
+      carregarSkeleton('Sem manifest');
+      return;
+    }
+    window.MEUS_PRODUTOS = manifest;
+    const produtos = manifest.produtos || [];
+    if (produtos.length === 0) {
+      carregarSkeleton('Sem produtos');
+      return;
+    }
+    $select.innerHTML = produtos
+      .map(p => '<option value="' + p.slug + '">' + (p.nome || p.slug) + '</option>')
+      .join('');
+    $select.disabled = false;
+    const ativoDoManifest = manifest.ativo;
+    const inicial = ativoDoManifest && produtos.some(p => p.slug === ativoDoManifest)
+      ? ativoDoManifest
+      : produtos[0].slug;
+    $select.value = inicial;
+    $select.onchange = e => trocarProduto(e.target.value);
+    await trocarProduto(inicial);
+  }
+
+  async function iniciar() {
+    if (window.electronAPI && window.electronAPI.checkClaude) {
+      const claudeOk = await window.electronAPI.checkClaude();
+      if (!claudeOk) {
+        renderAvisoInstalarClaude();
+        return;
+      }
+    }
+    await iniciarPainel();
+  }
+
+  iniciar();
+  if (window.electronAPI && window.electronAPI.onManifestChanged) {
+    window.electronAPI.onManifestChanged(() => iniciarPainel());
+  }
+})();
+</script>
+</body>
+</html>

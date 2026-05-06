@@ -1,0 +1,94 @@
+; Workshop IA - Kit de Instalacao Windows
+
+[Setup]
+AppName=Workshop IA
+AppVersion=1.0
+AppPublisher=Workshop IA
+WizardStyle=modern
+DefaultDirName={tmp}\workshop-ia-setup
+DisableDirPage=yes
+DisableProgramGroupPage=yes
+OutputDir=dist
+OutputBaseFilename=workshop-ia-setup-windows
+Compression=lzma2
+SolidCompression=yes
+ShowLanguageDialog=no
+CreateUninstallRegKey=no
+Uninstallable=no
+PrivilegesRequired=admin
+WizardImageFile=wizard-banner.bmp
+WizardSmallImageFile=wizard-icon.bmp
+
+[Languages]
+Name: "brazilianportuguese"; MessagesFile: "compiler:Languages\BrazilianPortuguese.isl"
+
+[Messages]
+WelcomeLabel1=Kit de Instalacao do Workshop IA
+WelcomeLabel2=Este assistente vai instalar automaticamente as ferramentas necessarias para o Workshop IA:%n%n  - Python 3%n  - Git%n  - Node.js%n  - Claude (app Anthropic)%n  - Workshop IA (painel local)%n%nO Workshop IA sera instalado em:%n  Documentos\workshop-ia%n%nTempo estimado: cerca de 10 minutos.%nMantenha a internet conectada durante o processo.%n%nClique em Avancar para continuar.
+FinishedLabel=Instalacao concluida com sucesso!%n%nO Workshop IA foi instalado em:%n  %USERPROFILE%\Documents\workshop-ia%n%nUm atalho "Workshop IA" foi criado na sua Area de Trabalho.%nClique duas vezes nele para abrir o painel.
+
+[Code]
+procedure RunStep(Msg: String; Cmd: String; StepNum: Integer; Total: Integer);
+var
+  ResultCode: Integer;
+begin
+  WizardForm.StatusLabel.Caption := Msg;
+  WizardForm.ProgressGauge.Position := ((StepNum - 1) * WizardForm.ProgressGauge.Max) div Total;
+  Exec(ExpandConstant('{sys}\WindowsPowerShell\v1.0\powershell.exe'),
+    '-ExecutionPolicy Bypass -NoProfile -WindowStyle Hidden -Command "' + Cmd + '"',
+    '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  WizardForm.ProgressGauge.Position := (StepNum * WizardForm.ProgressGauge.Max) div Total;
+end;
+
+procedure CurStepChanged(CurStep: TSetupStep);
+var
+  PathRefresh: String;
+  InstallDir: String;
+begin
+  if CurStep = ssInstall then
+  begin
+    WizardForm.ProgressGauge.Max := 100;
+
+    PathRefresh := '$env:Path=[System.Environment]::GetEnvironmentVariable(''Path'',''Machine'')+'';''+[System.Environment]::GetEnvironmentVariable(''Path'',''User''); ';
+    InstallDir := '$p=$env:USERPROFILE+''\Documents\workshop-ia''; ';
+
+    RunStep('Instalando Python 3... (passo 1 de 7)',
+      'winget install Python.Python.3.12 --silent --accept-package-agreements --accept-source-agreements',
+      1, 7);
+
+    RunStep('Instalando Git... (passo 2 de 7)',
+      'winget install Git.Git --silent --accept-package-agreements --accept-source-agreements',
+      2, 7);
+
+    RunStep('Instalando Node.js LTS... (passo 3 de 7)',
+      'winget install OpenJS.NodeJS.LTS --silent --accept-package-agreements --accept-source-agreements',
+      3, 7);
+
+    RunStep('Instalando Claude... (passo 4 de 7)',
+      'winget install Anthropic.Claude --silent --accept-package-agreements --accept-source-agreements',
+      4, 7);
+
+    RunStep('Baixando o Workshop IA... (passo 5 de 7)',
+      PathRefresh +
+      InstallDir +
+      'if (Test-Path ($p+''\.git'')) { Set-Location $p; git pull } else { git clone -b main https://github.com/engdailyapp-rlv/workshop_inteligente.git $p }',
+      5, 7);
+
+    RunStep('Instalando dependencias do painel... (passo 6 de 7)',
+      PathRefresh +
+      InstallDir +
+      'Set-Location $p; npm install',
+      6, 7);
+
+    RunStep('Criando atalho na area de trabalho... (passo 7 de 7)',
+      InstallDir +
+      'Set-Content -Path ($p+''\iniciar-workshop.bat'') -Value (''@echo off''+[char]13+[char]10+''npm start'') -Encoding ASCII; ' +
+      '$sh=New-Object -ComObject WScript.Shell; ' +
+      '$sc=$sh.CreateShortcut($env:USERPROFILE+''\Desktop\Workshop IA.lnk''); ' +
+      '$sc.TargetPath=$p+''\iniciar-workshop.bat''; ' +
+      '$sc.WorkingDirectory=$p; ' +
+      '$sc.WindowStyle=1; ' +
+      '$sc.Save()',
+      7, 7);
+  end;
+end;
