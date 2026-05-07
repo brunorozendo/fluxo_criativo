@@ -788,7 +788,7 @@ def build_shell(nome_produto: str, owner: str = "", timestamp: str = "") -> str:
   <aside class="sidebar">
     <div class="brand">
       <div class="brand-mark" aria-hidden="true"></div>
-      <div class="brand-text">fluxo<br/>criativo<span class="tiny">Painel &middot; v1.0</span></div>
+      <div class="brand-text">fluxo<br/>criativo<span class="tiny">Painel &middot; v1.1</span></div>
     </div>
     <div class="sala-link" id="sala-link" data-id="sala-dos-agentes" onclick="showSala()" title="Ver agentes trabalhando ao vivo">
       <span>Sala dos Agentes</span>
