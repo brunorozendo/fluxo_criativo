@@ -3,6 +3,25 @@ build/
 docs/
 
 
+# Arquivos binários grandes do Whisper
+.claude/tools/whisper/Release/
+.claude/tools/whisper/models/
+
+# ══════════════════════════════════════════
+# Chaves de API (NUNCA subir para repositorio)
+# ══════════════════════════════════════════
+.env
+.env.local
+.env.production
+
+# ══════════════════════════════════════════
+# Dados do aluno (cada um gera os seus)
+# ══════════════════════════════════════════
+# Estrutura multi-produto: toda a pasta meus-produtos/ fica local,
+# fora do repositorio. Painel global lê meus-produtos/index.json
+# (gerado pelos commands de gestão de produto).
+meus-produtos/
+
 # ══════════════════════════════════════════
 # Claude Code — arquivos de sessão/runtime
 # ══════════════════════════════════════════
@@ -24,6 +43,44 @@ docs/
 # (whisper.cpp + modelos — ~480 MB, instalados sob demanda)
 .claude/tools/
 
+# Cursor IDE (estado local; regras do projeto ficam em .cursor/rules/)
+.cursor/*
+!.cursor/rules/
+!.cursor/rules/**
+
+# Node
+node_modules/
+
+# Electron build output
+dist-electron/
+
+# DMG binários gerados pelo build (não versionar artefatos de distribuição)
+instalador/*.dmg
+instalador/*.exe
+
+# Assets locais. A pasta fica no Git via assets/.gitkeep,
+# mas todo conteudo gerado ou colocado pelo usuario fica fora.
+assets/**
+!assets/
+!assets/.gitkeep
+
+# ══════════════════════════════════════════
+# Arquivos de teste (nao subir)
+# ══════════════════════════════════════════
+test-*
+scripts/__pycache__/
+__pycache__/
+**/__pycache__/
+*.pyc
+
+# ══════════════════════════════════════════
+# Arquivos efêmeros (lock, logs, notas de sessão)
+# ══════════════════════════════════════════
+.claude/scheduled_tasks.lock
+scripts/*.log
+.continue-here.md
+.planning/
+
 # ══════════════════════════════════════════
 # Memória dos agentes (gerada localmente, cada aluno a sua)
 # A pasta e o README explicando a convenção sobem; o conteúdo
@@ -33,3 +90,50 @@ docs/
 .claude/agents-memory/*
 !.claude/agents-memory/.gitkeep
 !.claude/agents-memory/README.md
+
+# ══════════════════════════════════════════
+# docs/ é área local de desenvolvimento (plans, rascunhos)
+# A documentação permanente foi internalizada: ARQUITETURA.md fica
+# na raiz; guias de setup viraram commands em .claude/commands/;
+# docs/processo-criativos.md virou scripts/README-creative.md.
+# ══════════════════════════════════════════
+docs/
+
+# ══════════════════════════════════════════
+# Sistema operacional
+# ══════════════════════════════════════════
+.DS_Store
+Thumbs.db
+desktop.ini
+*.tmp
+
+# ══════════════════════════════════════════
+# Vercel (deploy e configurações de projeto)
+# ══════════════════════════════════════════
+.vercel/
+.env*.local
+
+# ══════════════════════════════════════════
+# Entregas geradas localmente (cada aluno gera as suas)
+# conta.md tem dados da conta do aluno; use conta.exemplo.md como template.
+# Os demais sao outputs do instagram-dashboard (gerados a cada execucao).
+# ══════════════════════════════════════════
+deploy-painel-workshop/
+deploy-playbook-eff/
+entregas/
+galeria-furadeira/
+painel-preview.html
+pesquisa-mercado-export.html
+pesquisa-mercado.pdf
+entregas/conta.md
+entregas/instagram-dashboard/dashboard.html
+entregas/instagram-dashboard/insights.json
+entregas/instagram-dashboard/log.txt
+entregas/instagram-dashboard/imagens/
+
+# Certificados e chaves privadas (nunca versionar)
+*.key
+*.p12
+*.cer
+*.certSigningRequest
+*.pem
