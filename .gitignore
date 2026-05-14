@@ -139,3 +139,6 @@ entregas/instagram-dashboard/imagens/
 *.pem
 
 skill-analise/
+
+package-lock.json
+package.json
